@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบฟิสิกส์ เตรียมสอบเข้ามหาวิทยาลัย</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap'); /* Using Sarabun from Google Fonts */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', sans-serif; /* Apply Sarabun font */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-shrink: 0; /* Prevent container from shrinking too much on small screens */
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .start-screen, .quiz-screen, .result-screen {
+            display: none;
+        }
+        
+        .start-screen.active, .quiz-screen.active, .result-screen.active {
+            display: block;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .category-btn {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Sarabun', sans-serif;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .question-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-family: 'Sarabun', sans-serif;
+            text-align: left;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+        
+        .option.correct {
+            border-color: #48bb78; /* Green */
+            background: #f0fff4; /* Light green */
+            font-weight: bold;
+        }
+        
+        .option.incorrect {
+            border-color: #f56565; /* Red */
+            background: #fff5f5; /* Light red */
+            font-weight: bold;
+        }
+        
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            display: none;
+            color: #2d3748;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .explanation.show {
+            display: block;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-family: 'Sarabun', sans-serif;
+            flex-grow: 1; /* Allow buttons to grow */
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #cbd5e0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .score-display {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .score-circle .score {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        
+        .score-circle .total {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .result-message {
+            font-size: 24px;
+            color: #2d3748;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease-in-out;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            .header {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+            .header p {
+                font-size: 14px;
+            }
+            .content {
+                padding: 20px;
+            }
+            .category-grid {
+                grid-template-columns: 1fr; /* Stack categories on small screens */
+            }
+            .category-btn {
+                font-size: 16px;
+            }
+            .question-text {
+                font-size: 18px;
+            }
+            .option {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+            .btn {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+            .score-circle {
+                width: 160px;
+                height: 160px;
+            }
+            .score-circle .score {
+                font-size: 40px;
+            }
+            .score-circle .total {
+                font-size: 18px;
+            }
+            .result-message {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 แบบทดสอบฟิสิกส์</h1>
+            <p>เตรียมความพร้อมสอบเข้ามหาวิทยาลัย</p>
+        </div>
+        
+        <div class="content">
+            <!-- Start Screen -->
+            <div class="start-screen active">
+                <h2 style="text-align: center; margin-bottom: 20px; color: #2d3748;">เลือกหมวดหมู่ที่ต้องการทดสอบ</h2>
+                <div class="category-grid">
+                    <button class="category-btn" onclick="startQuiz('mechanics')">⚙️ กลศาสตร์และแรง</button>
+                    <button class="category-btn" onclick="startQuiz('energy')">⚡ งานและพลังงาน</button>
+                    <button class="category-btn" onclick="startQuiz('waves')">🌊 คลื่นและเสียง</button>
+                    <button class="category-btn" onclick="startQuiz('electricity')">🔌 ไฟฟ้า</button>
+                    <button class="category-btn" onclick="startQuiz('modern')">⚛️ ฟิสิกส์ยุคใหม่</button>
+                    <button class="category-btn" onclick="startQuiz('all')">📚 ทั้งหมด</button>
+                </div>
+            </div>
+            
+            <!-- Quiz Screen -->
+            <div class="quiz-screen">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="questionContainer"></div>
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="previousQuestion()">← ก่อนหน้า</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">ถัดไป →</button>
+                </div>
+            </div>
+            
+            <!-- Result Screen -->
+            <div class="result-screen">
+                <div class="score-display">
+                    <h2 class="result-message" id="resultMessage"></h2>
+                    <div class="score-circle">
+                        <div class="score" id="scoreValue"></div>
+                        <div class="total" id="scoreTotal"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="restartQuiz()">ทำแบบทดสอบใหม่</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            mechanics: [
+                {
+                    question: "สูตรของกฎข้อที่สองของนิวตัน (Newton's Second Law) คือข้อใด?",
+                    options: ["F = ma", "F = mv", "F = m/a", "F = ma²"],
+                    correct: 0,
+                    explanation: "F = ma โดย F คือแรง (Force), m คือมวล (mass), a คือความเร่ง (acceleration)"
+                },
+                {
+                    question: "หน่วยของแรงในระบบ SI คืออะไร?",
+                    options: ["จูล (J)", "นิวตัน (N)", "วัตต์ (W)", "ปาสคาล (Pa)"],
+                    correct: 1,
+                    explanation: "นิวตัน (N) เป็นหน่วยของแรง โดย 1 N = 1 kg·m/s²"
+                },
+                {
+                    question: "แรงเสียดทานจลน์มีค่าเท่าใด ถ้าสัมประสิทธิ์แรงเสียดทานจลน์ μk = 0.3 และแรงปกติ N = 50 N?",
+                    options: ["10 N", "15 N", "20 N", "25 N"],
+                    correct: 1,
+                    explanation: "แรงเสียดทาน f = μk × N = 0.3 × 50 = 15 N"
+                },
+                {
+                    question: "โมเมนตัม (Momentum) คำนวณจากสูตรใด?",
+                    options: ["p = mv", "p = ma", "p = Ft", "p = 1/2mv²"],
+                    correct: 0,
+                    explanation: "โมเมนตัม p = mv โดย m คือมวล และ v คือความเร็ว หน่วยเป็น kg·m/s"
+                },
+                {
+                    question: "ความเร่งเนื่องจากแรงโน้มถ่วงของโลกมีค่าประมาณเท่าใด?",
+                    options: ["9.8 m/s²", "10 m/s²", "8.9 m/s²", "11 m/s²"],
+                    correct: 0,
+                    explanation: "ความเร่งเนื่องจากแรงโน้มถ่วง g = 9.8 m/s² (หรือประมาณ 10 m/s²)"
+                }
+            ],
+            energy: [
+                {
+                    question: "สูตรของงาน (Work) คืออะไร?",
+                    options: ["W = Fd", "W = Pt", "W = 1/2mv²", "W = mgh"],
+                    correct: 0,
+                    explanation: "W = Fd โดย F คือแรง, d คือระยะทางที่เคลื่อนที่ในทิศทางของแรง"
+                },
+                {
+                    question: "หน่วยของพลังงานในระบบ SI คือข้อใด?",
+                    options: ["วัตต์ (W)", "จูล (J)", "นิวตัน (N)", "แคลอรี (cal)"],
+                    correct: 1,
+                    explanation: "จูล (J) เป็นหน่วยของพลังงานและงาน โดย 1 J = 1 N·m"
+                },
+                {
+                    question: "พลังงานจลน์ (Kinetic Energy) คำนวณจากสูตรใด?",
+                    options: ["KE = mv", "KE = mgh", "KE = 1/2mv²", "KE = Fd"],
+                    correct: 2,
+                    explanation: "พลังงานจลน์ KE = 1/2mv² โดย m คือมวล และ v คือความเร็ว"
+                },
+                {
+                    question: "พลังงานศักย์โน้มถ่วง (Gravitational Potential Energy) คำนวณจากสูตรใด?",
+                    options: ["PE = mgh", "PE = 1/2kx²", "PE = 1/2mv²", "PE = Fd"],
+                    correct: 0,
+                    explanation: "พลังงานศักย์โน้มถ่วง PE = mgh โดย m คือมวล, g คือความเร่งโน้มถ่วง, h คือความสูง"
+                },
+                {
+                    question: "กำลัง (Power) คือ?",
+                    options: ["อัตราการเปลี่ยนแปลงของงาน", "แรงคูณระยะทาง", "มวลคูณความเร็ว", "พลังงานรวม"],
+                    correct: 0,
+                    explanation: "กำลัง P = W/t คืออัตราการทำงานหรืออัตราการเปลี่ยนแปลงของพลังงาน หน่วยเป็นวัตต์ (W)"
+                }
+            ],
+            waves: [
+                {
+                    question: "ความสัมพันธ์ระหว่างความเร็วคลื่น ความถี่ และความยาวคลื่นคืออะไร?",
+                    options: ["v = fλ", "v = f/λ", "v = λ/f", "v = f²λ"],
+                    correct: 0,
+                    explanation: "v = fλ โดย v คือความเร็วคลื่น, f คือความถี่, λ คือความยาวคลื่น"
+                },
+                {
+                    question: "ความเร็วของเสียงในอากาศที่อุณหภูมิห้องประมาณเท่าใด?",
+                    options: ["340 m/s", "300 m/s", "400 m/s", "500 m/s"],
+                    correct: 0,
+                    explanation: "ความเร็วของเสียงในอากาศที่อุณหภูมิห้อง (20°C) ประมาณ 340 m/s"
+                },
+                {
+                    question: "ปรากฏการณ์ที่คลื่นเปลี่ยนทิศเมื่อผ่านจากตัวกลางหนึ่งไปยังอีกตัวกลางหนึ่งเรียกว่าอะไร?",
+                    options: ["การสะท้อน", "การหักเห", "การแทรกสอด", "การเลี้ยวเบน"],
+                    correct: 1,
+                    explanation: "การหักเห (Refraction) เกิดเมื่อคลื่นเปลี่ยนทิศทางเนื่องจากความเร็วเปลี่ยนแปลงเมื่อผ่านตัวกลางที่ต่างกัน"
+                },
+                {
+                    question: "คลื่นแม่เหล็กไฟฟ้าเดินทางในสุญญากาศด้วยความเร็วเท่าใด?",
+                    options: ["3×10⁸ m/s", "3×10⁶ m/s", "3×10⁷ m/s", "3×10⁹ m/s"],
+                    correct: 0,
+                    explanation: "คลื่นแม่เหล็กไฟฟ้าเดินทางด้วยความเร็วแสง c = 3×10⁸ m/s ในสุญญากาศ"
+                },
+                {
+                    question: "ความถี่ของเสียงที่มนุษย์สามารถได้ยินได้อยู่ในช่วงใด?",
+                    options: ["20-20,000 Hz", "10-10,000 Hz", "100-100,000 Hz", "1-1,000 Hz"],
+                    correct: 0,
+                    explanation: "มนุษย์สามารถได้ยินเสียงในช่วง 20-20,000 Hz (หรือ 20 Hz - 20 kHz)"
+                }
+            ],
+            electricity: [
+                {
+                    question: "กฎของโอห์ม (Ohm's Law) คืออะไร?",
+                    options: ["V = IR", "V = I/R", "V = R/I", "V = I²R"],
+                    correct: 0,
+                    explanation: "V = IR โดย V คือแรงดันไฟฟ้า (Voltage), I คือกระแสไฟฟ้า (Current), R คือความต้านทาน (Resistance)"
+                },
+                {
+                    question: "หน่วยของกระแสไฟฟ้าคือข้อใด?",
+                    options: ["โวลต์ (V)", "แอมแปร์ (A)", "โอห์ม (Ω)", "วัตต์ (W)"],
+                    correct: 1,
+                    explanation: "แอมแปร์ (A) เป็นหน่วยของกระแสไฟฟ้า"
+                },
+                {
+                    question: "กำลังไฟฟ้า (Electric Power) คำนวณจากสูตรใด?",
+                    options: ["P = VI", "P = V/I", "P = IR", "P = V²/I"],
+                    correct: 0,
+                    explanation: "P = VI หรือ P = I²R หรือ P = V²/R โดย P คือกำลังไฟฟ้า หน่วยเป็นวัตต์ (W)"
+                },
+                {
+                    question: "การต่อตัวต้านทานแบบอนุกรม (Series) ความต้านทานรวมคำนวณจาก?",
+                    options: ["R_total = R₁ + R₂ + R₃", "1/R_total = 1/R₁ + 1/R₂", "R_total = R₁ × R₂", "R_total = R₁/R₂"],
+                    correct: 0,
+                    explanation: "การต่ออนุกรม: R_total = R₁ + R₂ + R₃ + ..."
+                },
+                {
+                    question: "ประจุไฟฟ้าพื้นฐานของอิเล็กตรอนมีค่าเท่าใด?",
+                    options: ["1.6×10⁻¹⁹ C", "1.6×10⁻¹⁸ C", "1.6×10⁻²⁰ C", "1.6×10⁻¹⁷ C"],
+                    correct: 0,
+                    explanation: "ประจุของอิเล็กตรอน e = 1.6×10⁻¹⁹ คูลอมบ์ (C)"
+                }
+            ],
+            modern: [
+                {
+                    question: "สมการมวล-พลังงานของไอน์สไตน์คืออะไร?",
+                    options: ["E = mc²", "E = mc", "E = m²c", "E = mc³"],
+                    correct: 0,
+                    explanation: "E = mc² โดย E คือพลังงาน, m คือมวล, c คือความเร็วแสง"
+                },
+                {
+                    question: "อะตอมประกอบด้วยอนุภาคพื้นฐานใดบ้าง?",
+                    options: ["โปรตอน นิวตรอน อิเล็กตรอน", "โปรตอน อิเล็กตรอน", "โปรตอน นิวตรอน", "นิวตรอน อิเล็กตรอน"],
+                    correct: 0,
+                    explanation: "อะตอมประกอบด้วย โปรตอน (ประจุบวก) และนิวตรอน (ไม่มีประจุ) อยู่ในนิวเคลียส และอิเล็กตรอน (ประจุลบ) โคจรรอบนิวเคลียส"
+                },
+                {
+                    question: "ปรากฏการณ์โฟโตอิเล็กทริก (Photoelectric Effect) พิสูจน์เรื่องใด?",
+                    options: ["แสงมีสมบัติเป็นคลื่น", "แสงมีสมบัติเป็นอนุภาค", "แสงเป็นคลื่นแม่เหล็กไฟฟ้า", "แสงเดินทางเป็นเส้นตรง"],
+                    correct: 1,
+                    explanation: "ปรากฏการณ์โฟโตอิเล็กทริกพิสูจน์ว่าแสงมีสมบัติเป็นอนุภาค (โฟตอน) อธิบายโดยอัลเบิร์ต ไอน์สไตน์"
+                },
+                {
+                    question: "เลขอะตอม (Atomic Number) คือจำนวนของอนุภาคใดในนิวเคลียส?",
+                    options: ["จำนวนโปรตอน", "จำนวนนิวตรอน", "จำนวนอิเล็กตรอน", "จำนวนโปรตอน + นิวตรอน"],
+                    correct: 0,
+                    explanation: "เลขอะตอม Z คือจำนวนโปรตอนในนิวเคลียส ซึ่งเป็นตัวกำหนดชนิดของธาตุ"
+                },
+                {
+                    question: "ปฏิกิริยาฟิวชัน (Nuclear Fusion) คืออะไร?",
+                    options: ["การรวมตัวของนิวเคลียสเบา", "การแตกตัวของนิวเคลียสหนัก", "การสลายตัวของอะตอม", "การปลดปล่อยอิเล็กตรอน"],
+                    correct: 0,
+                    explanation: "ฟิวชันเป็นกระบวนการรวมตัวของนิวเคลียสเบาเป็นนิวเคลียสหนักและปลดปล่อยพลังงานมหาศาล เช่น ที่เกิดในดวงอาทิตย์"
+                },
+                {
+                    question: "ค่าคงที่พลังค์ (Planck's constant) มีค่าประมาณเท่าใด?",
+                    options: ["6.63×10⁻³⁴ J·s", "6.63×10⁻³³ J·s", "6.63×10⁻³⁵ J·s", "6.63×10⁻³² J·s"],
+                    correct: 0,
+                    explanation: "ค่าคงที่พลังค์ h = 6.63×10⁻³⁴ J·s ใช้ในฟิสิกส์ควอนตัม"
+                },
+                {
+                    question: "รังสีแอลฟา (Alpha radiation) ประกอบด้วยอนุภาคใด?",
+                    options: ["นิวเคลียสของฮีเลียม", "อิเล็กตรอน", "โฟตอน", "นิวตรอน"],
+                    correct: 0,
+                    explanation: "รังสีแอลฟาประกอบด้วยอนุภาคแอลฟา (2 โปรตอน + 2 นิวตรอน) ซึ่งเหมือนนิวเคลียสของฮีเลียม-4"
+                },
+                {
+                    question: "ครึ่งชีวิต (Half-life) หมายถึงอะไร?",
+                    options: ["เวลาที่สารกัมมันตรังสีสลายตัวไปครึ่งหนึ่ง", "เวลาที่สารหมดไป", "เวลาที่อะตอมแตกตัว", "เวลาที่เกิดปฏิกิริยา"],
+                    correct: 0,
+                    explanation: "ครึ่งชีวิตคือเวลาที่จำนวนนิวเคลียสที่ยังไม่สลายตัวลดลงเหลือครึ่งหนึ่งของจำนวนเริ่มต้น"
+                }
+            ]
+        };
+
+        let currentCategory = 'all';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = []; // To store user's selected option for each question
+
+        function startQuiz(category) {
+            currentCategory = category;
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = []; // Reset answers for a new quiz
+            
+            if (category === 'all') {
+                currentQuestions = [];
+                Object.values(quizData).forEach(questions => {
+                    currentQuestions = currentQuestions.concat(questions);
+                });
+                currentQuestions = shuffleArray(currentQuestions).slice(0, 15); // Take 15 random questions
+            } else {
+                currentQuestions = [...quizData[category]];
+            }
+            
+            // Initialize userAnswers array with null for each question
+            userAnswers = Array(currentQuestions.length).fill(null);
+
+            // Mark all questions as not scored yet
+            currentQuestions.forEach(q => q.scored = false);
+
+            document.querySelector('.start-screen').classList.remove('active');
+            document.querySelector('.quiz-screen').classList.add('active');
+            displayQuestion();
+        }
+
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function displayQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            const container = document.getElementById('questionContainer');
+            let optionsHtml = question.options.map((option, index) => {
+                let optionClass = 'option';
+                let onClickAttribute = `onclick="selectOption(${index})"`;
+
+                // If user has already answered this question, show their selection and correctness
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    onClickAttribute = ''; // Disable clicks after answering
+                    if (index === userAnswers[currentQuestionIndex]) {
+                        optionClass += (index === question.correct) ? ' correct' : ' incorrect';
+                    } else if (index === question.correct) {
+                        optionClass += ' correct'; // Highlight the correct answer even if not selected
+                    }
+                }
+                return `<div class="${optionClass}" data-index="${index}" ${onClickAttribute}>${option}</div>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">คำถามที่ ${currentQuestionIndex + 1} จาก ${currentQuestions.length}</div>
+                    <div class="question-text">${question.question}</div>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="explanation ${userAnswers[currentQuestionIndex] !== null ? 'show' : ''}">
+                        <strong>คำอธิบาย:</strong> ${question.explanation}
+                    </div>
+                </div>
+            `;
+
+            // Update button states
+            document.querySelector('.btn-secondary').disabled = (currentQuestionIndex === 0);
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestionIndex === currentQuestions.length - 1) {
+                nextBtn.textContent = 'ดูผลลัพธ์ 📊';
+            } else {
+                nextBtn.textContent = 'ถัดไป →';
+            }
+            // Next button is disabled if no answer is selected AND it's not the last question
+            nextBtn.disabled = (userAnswers[currentQuestionIndex] === null && currentQuestionIndex < currentQuestions.length - 1);
+        }
+
+        function selectOption(selectedIndex) {
+            // If an answer is already selected for this question, do nothing
+            if (userAnswers[currentQuestionIndex] !== null) { 
+                return;
+            }
+
+            userAnswers[currentQuestionIndex] = selectedIndex; // Store the user's answer
+            
+            const optionsDivs = document.querySelectorAll('.option');
+            optionsDivs.forEach((optionDiv, index) => {
+                optionDiv.classList.remove('selected'); // Remove any previous 'selected' class
+                if (index === selectedIndex) {
+                    optionDiv.classList.add('selected');
+                }
+                // Disable further clicks on options after selection
+                optionDiv.onclick = null;
+            });
+
+            // Show explanation and mark correct/incorrect
+            const question = currentQuestions[currentQuestionIndex];
+            document.querySelector('.explanation').classList.add('show');
+            optionsDivs[question.correct].classList.add('correct');
+            if (selectedIndex !== question.correct) {
+                optionsDivs[selectedIndex].classList.add('incorrect');
+            }
+
+            // Enable next button after an answer is selected
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+
+        function nextQuestion() {
+            // If the user hasn't answered the current question yet, and it's not the last question, prevent moving
+            if (userAnswers[currentQuestionIndex] === null && currentQuestionIndex < currentQuestions.length - 1) {
+                // Optionally, add a visual cue here (e.g., shake button, temporary message)
+                return;
+            }
+
+            // Calculate score for the current question if not already done
+            if (userAnswers[currentQuestionIndex] === currentQuestions[currentQuestionIndex].correct &&
+                !currentQuestions[currentQuestionIndex].scored) { // Prevent scoring multiple times
+                score++;
+                currentQuestions[currentQuestionIndex].scored = true; // Mark as scored
+            }
+
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function previousQuestion() {
+            // When moving back, if the current question has an answer, we mark it as "unscored" temporarily
+            // This is useful if someone changes their mind and wants to re-answer (though current setup prevents re-answering)
+            // For this quiz, since re-answering is blocked, we just ensure `scored` status is handled correctly
+            if (currentQuestionIndex > 0) {
+                // If the user *had* answered correctly and it was scored, decrement score
+                if (userAnswers[currentQuestionIndex] === currentQuestions[currentQuestionIndex].correct &&
+                    currentQuestions[currentQuestionIndex].scored) {
+                    score--;
+                    currentQuestions[currentQuestionIndex].scored = false;
+                }
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function showResult() {
+            document.querySelector('.quiz-screen').classList.remove('active');
+            document.querySelector('.result-screen').classList.add('active');
+            
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('scoreTotal').textContent = `/ ${currentQuestions.length}`;
+
+            const resultMessage = document.getElementById('resultMessage');
+            let percentage = (score / currentQuestions.length) * 100;
+
+            if (percentage === 100) {
+                resultMessage.textContent = "ยอดเยี่ยม! 💯 คุณทำคะแนนได้สมบูรณ์แบบ!";
+                 generateImage("A triumphant student celebrating perfect quiz score, surrounded by physics equations, in a vibrant, joyful style.");
+            } else if (percentage >= 80) {
+                resultMessage.textContent = "ดีมาก! คุณเข้าใจเนื้อหาได้ยอดเยี่ยม 👍";
+                 generateImage("A student looking confident and pleased, having successfully completed a physics quiz, with a bright background.");
+            } else if (percentage >= 50) {
+                resultMessage.textContent = "ทำได้ดี! พยายามอีกนิดเพื่อผลลัพธ์ที่ดีขึ้น 💪";
+                 generateImage("A student studying physics books with a determined expression, surrounded by diagrams and formulas, in a focused academic setting.");
+            } else {
+                resultMessage.textContent = "ลองอีกครั้ง! สู้ๆนะ แล้วคุณจะเก่งขึ้น 💡";
+                 generateImage("A student thinking hard, perhaps looking at a physics problem, with a lightbulb moment idea above their head, in an encouraging style.");
+            }
+        }
+
+        function restartQuiz() {
+            document.querySelector('.result-screen').classList.remove('active');
+            document.querySelector('.start-screen').classList.add('active');
+        }
+
+        // --- Image Generation Integration ---
+        function generateImage(prompt) {
+            // This is where you would typically
